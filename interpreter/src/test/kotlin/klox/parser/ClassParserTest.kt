@@ -3,49 +3,52 @@ package klox.parser
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
-class FunctionParserTest {
+class ClassParserTest {
     @Test
-    fun `function has no parameter`() {
+    fun `empty class`() {
         val script = """
-            fun f1() {
+            class Duck {
             }
         """.trimIndent()
 
         assertEquals(
             """
-            Function(name=IDENTIFIER f1 null, parameters=[], body=[])
+            Class(name=IDENTIFIER Duck null, superClass=null, methods=[])
             """.trimIndent(),
             parse(script),
         )
     }
 
     @Test
-    fun `function has parameters`() {
+    fun `empty class with inheritance`() {
         val script = """
-            fun f1(a, b, c) {
+            class Duck < Bird {
             }
         """.trimIndent()
 
         assertEquals(
             """
-            Function(name=IDENTIFIER f1 null, parameters=[IDENTIFIER a null, IDENTIFIER b null, IDENTIFIER c null], body=[])
+            Class(name=IDENTIFIER Duck null, superClass=Variable(name=IDENTIFIER Bird null), methods=[])
             """.trimIndent(),
             parse(script),
         )
     }
 
     @Test
-    fun `function has inner function`() {
+    fun `class with one method`() {
         val script = """
-            fun f1() {
-                fun f2() {
+            class Duck {
+                fun fly() {
+                }
+                
+                fun swim() {
                 }
             }
         """.trimIndent()
 
         assertEquals(
             """
-            Function(name=IDENTIFIER f1 null, parameters=[], body=[Function(name=IDENTIFIER f2 null, parameters=[], body=[])])
+            Class(name=IDENTIFIER Duck null, superClass=null, methods=[Function(name=IDENTIFIER fly null, parameters=[], body=[]), Function(name=IDENTIFIER swim null, parameters=[], body=[])])
             """.trimIndent(),
             parse(script),
         )
