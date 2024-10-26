@@ -1,5 +1,6 @@
 package klox.scanner
 
+import klox.Lox
 import kotlin.system.exitProcess
 
 class Scanner(
@@ -42,22 +43,27 @@ class Scanner(
             '=' -> addToken(if (match('=')) TokenType.EQUAL_EQUAL else TokenType.EQUAL)
             '<' -> addToken(if (match('=')) TokenType.LESS_EQUAL else TokenType.LESS)
             '>' -> addToken(if (match('=')) TokenType.GREATER_EQUAL else TokenType.GREATER)
-            '/' -> if (match('/')) {
-                // A comment goes until the end of the line.
-                while (peek() != '\n' && !isAtEnd()) advance()
-            } else {
-                addToken(TokenType.SLASH)
+            '/' -> {
+                if (match('/')) {
+                    // A comment goes until the end of the line.
+                    while (peek() != '\n' && !isAtEnd()) advance()
+                } else {
+                    addToken(TokenType.SLASH)
+                }
             }
 
             ' ', '\r', '\t' -> {}
             '\n' -> line++
             '"' -> string()
-            else -> if (c.isDigit()) {
-                number()
-            } else if (c.isAlpha()) {
-                identifier()
-            } else {
-                exitProcess(0)
+
+            else -> {
+                if (c.isDigit()) {
+                    number()
+                } else if (c.isAlpha()) {
+                    identifier()
+                } else {
+                    Lox.error(line, "Unexpected character.")
+                }
             }
         }
     }
@@ -69,7 +75,7 @@ class Scanner(
         }
 
         if (isAtEnd()) {
-            exitProcess(0)
+            Lox.error(line, "Unterminated string.")
         }
 
         advance() // bypass closing `"`
