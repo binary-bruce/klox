@@ -1,6 +1,7 @@
 package klox.parser
 
 import klox.Lox
+import klox.ast.Expr
 import klox.ast.Stmt
 import klox.scanner.Token
 import klox.scanner.TokenType
@@ -21,8 +22,35 @@ class Parser(private val tokens: List<Token>) {
     }
 
     private fun declaration(): Stmt {
-        if (match(FUN)) return function(FunctionKind.FUNCTION)
+        when {
+            match(FUN) -> return function(FunctionKind.FUNCTION)
+            match(CLASS) -> return classDeclaration()
+        }
+
         throw NotImplementedError()
+    }
+
+    private fun classDeclaration(): Stmt {
+        val name = consume(IDENTIFIER, "Expect class name.")
+
+        val superClass = if (match(LESS)) {
+            consume(IDENTIFIER, "Expect super class name.")
+            Expr.Variable(previous())
+        } else {
+            null
+        }
+
+        consume(LEFT_BRACE, "Expect '{' before class body.")
+
+        val methods = mutableListOf<Stmt.Function>()
+        while (!check(RIGHT_BRACE) && !isAtEnd()) {
+            consume(FUN, "Expect keyword `fun`.")
+            methods.add(function(FunctionKind.METHOD))
+        }
+
+        consume(RIGHT_BRACE, "Expect '}' after class body.")
+
+        return Stmt.Class(name, superClass, methods)
     }
 
     private fun function(kind: FunctionKind): Stmt.Function {
