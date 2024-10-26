@@ -171,6 +171,25 @@ class ScannerTest {
     }
 
     @Test
+    fun emptyFunction() {
+        check(
+            """
+                fun f1() {
+                }
+            """.trimIndent(),
+            """
+                FUN fun null
+                IDENTIFIER f1 null
+                LEFT_PAREN ( null
+                RIGHT_PAREN ) null
+                LEFT_BRACE { null
+                RIGHT_BRACE } null
+                EOF  null
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun print() {
         check(
             """
