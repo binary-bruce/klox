@@ -1,4 +1,4 @@
-package klox
+package klox.scanner
 
 data class Token(
     val type: TokenType,

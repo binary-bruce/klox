@@ -1,4 +1,4 @@
-package klox
+package klox.scanner
 
 enum class TokenType {
     // Single-character tokens.

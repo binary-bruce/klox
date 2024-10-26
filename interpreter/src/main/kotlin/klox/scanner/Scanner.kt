@@ -1,4 +1,4 @@
-package klox
+package klox.scanner
 
 import kotlin.system.exitProcess
 
