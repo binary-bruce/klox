@@ -13,11 +13,11 @@ class ParserTest {
             }
 
             class Duck {
-              fun init(name) {
+              init(name) {
                 this.name = name;
               }
 
-              fun quack() {
+              quack() {
                 print this.name + " quacks";
               }
             }

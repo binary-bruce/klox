@@ -305,7 +305,6 @@ class Parser(private val tokens: List<Token>) {
 
         val methods = mutableListOf<Stmt.Function>()
         while (!check(RIGHT_BRACE) && !isAtEnd()) {
-            consume(FUN, "Expect keyword `fun`.")
             methods.add(function(FunctionKind.METHOD))
         }
 

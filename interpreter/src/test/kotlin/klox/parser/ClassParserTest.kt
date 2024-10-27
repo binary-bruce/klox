@@ -38,10 +38,10 @@ class ClassParserTest {
     fun `class with one method`() {
         val script = """
             class Duck {
-                fun fly() {
+                fly() {
                 }
                 
-                fun swim() {
+                swim() {
                 }
             }
         """.trimIndent()
