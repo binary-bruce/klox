@@ -35,9 +35,18 @@ class Parser(private val tokens: List<Token>) {
             match(FOR) -> forStatement()
             match(IF) -> ifStatement()
             match(PRINT) -> printStatement()
+            match(RETURN) -> returnStatement()
             match(LEFT_BRACE) -> Stmt.Block(block())
             else -> expressionStatement()
         }
+    }
+
+    private fun returnStatement(): Stmt {
+        val keyword = previous()
+        val value = if (!check(SEMICOLON)) expression() else null
+        consume(SEMICOLON, "Expect ';' after return value.")
+
+        return Stmt.Return(keyword, value)
     }
 
     private fun printStatement(): Stmt {

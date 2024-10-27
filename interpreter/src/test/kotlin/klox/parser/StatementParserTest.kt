@@ -42,4 +42,17 @@ class StatementParserTest {
             parse("print 1 + 1;")
         )
     }
+
+    @Test
+    fun `test return`() {
+        assertEquals(
+            "Return(keyword=RETURN return null, value=null)",
+            parse("return;")
+        )
+
+        assertEquals(
+            "Return(keyword=RETURN return null, value=Call(callee=Get(object=Variable(name=IDENTIFIER a null), name=IDENTIFIER b null), paren=RIGHT_PAREN ) null, arguments=[]))",
+            parse("return a.b();")
+        )
+    }
 }
