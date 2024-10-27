@@ -16,4 +16,17 @@ class StatementParserTest {
             parse("for(var i = 0;i <= 100;i = i + 1){ sum = sum + i; }"),
         )
     }
+
+    @Test
+    fun `test if`() {
+        assertEquals(
+            "If(condition=Binary(left=Variable(name=IDENTIFIER a null), operator=EQUAL_EQUAL == null, right=Literal(value=19.0)), thenBranch=Expression(expression=Call(callee=Variable(name=IDENTIFIER greet null), paren=RIGHT_PAREN ) null, arguments=[])), elseBranch=null)",
+            parse("if (a == 19) greet();")
+        )
+
+        assertEquals(
+            "If(condition=Binary(left=Variable(name=IDENTIFIER a null), operator=EQUAL_EQUAL == null, right=Literal(value=0.0)), thenBranch=Expression(expression=Literal(value=true)), elseBranch=Block(statements=[Expression(expression=Literal(value=false))]))",
+            parse("if (a == 0) true; else { false; }")
+        )
+    }
 }

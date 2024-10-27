@@ -33,7 +33,7 @@ sealed class Stmt {
         override fun <R> accept(visitor: Visitor<R>): R = visitor.visit(this)
     }
 
-    data class If(val condition: Expr, val thenBranch: Stmt, val elseBranch: Stmt) : Stmt() {
+    data class If(val condition: Expr, val thenBranch: Stmt, val elseBranch: Stmt?) : Stmt() {
         override fun <R> accept(visitor: Visitor<R>): R = visitor.visit(this)
     }
 
