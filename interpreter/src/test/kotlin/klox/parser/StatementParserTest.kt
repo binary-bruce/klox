@@ -55,4 +55,17 @@ class StatementParserTest {
             parse("return a.b();")
         )
     }
+
+    @Test
+    fun `test while`() {
+        assertEquals(
+            "While(condition=Literal(value=true), body=Block(statements=[]))",
+            parse("while(true) {}")
+        )
+
+        assertEquals(
+            "While(condition=Literal(value=true), body=Block(statements=[Expression(expression=Assign(name=IDENTIFIER a null, value=Binary(left=Variable(name=IDENTIFIER a null), operator=PLUS + null, right=Literal(value=1.0))))]))",
+            parse("while(true) { a = a + 1; }")
+        )
+    }
 }
