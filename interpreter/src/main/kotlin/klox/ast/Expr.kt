@@ -40,7 +40,7 @@ sealed class Expr {
         override fun <R> accept(visitor: Visitor<R>): R = visitor.visit(this)
     }
 
-    data class Literal(val value: Any) : Expr() {
+    data class Literal(val value: Any?) : Expr() {
         override fun <R> accept(visitor: Visitor<R>): R = visitor.visit(this)
     }
 
