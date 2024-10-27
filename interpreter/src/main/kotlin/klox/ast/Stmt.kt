@@ -45,7 +45,7 @@ sealed class Stmt {
         override fun <R> accept(visitor: Visitor<R>): R = visitor.visit(this)
     }
 
-    data class Var(val name: Token, val initializer: Expr) : Stmt() {
+    data class Var(val name: Token, val initializer: Expr?) : Stmt() {
         override fun <R> accept(visitor: Visitor<R>): R = visitor.visit(this)
     }
 

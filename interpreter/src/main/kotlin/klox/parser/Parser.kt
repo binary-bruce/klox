@@ -25,9 +25,189 @@ class Parser(private val tokens: List<Token>) {
         when {
             match(FUN) -> return function(FunctionKind.FUNCTION)
             match(CLASS) -> return classDeclaration()
+            match(VAR) -> return varDeclaration()
         }
 
         throw NotImplementedError()
+    }
+
+    private fun varDeclaration(): Stmt {
+        val name = consume(IDENTIFIER, "Expect variable name.")
+
+        val initializer = if (match(EQUAL)) {
+            expression()
+        } else {
+            null
+        }
+        consume(SEMICOLON, "Expect ';' after variable declaration.")
+
+        return Stmt.Var(name, initializer)
+    }
+
+    private fun expression(): Expr {
+        return assignment()
+    }
+
+    private fun assignment(): Expr {
+        val expr = or()
+
+        if (match(EQUAL)) {
+            val equals = previous()
+            val value = assignment()
+
+            if (expr is Expr.Variable) {
+                val name = expr.name
+                return Expr.Assign(name, value)
+            } else if (expr is Expr.Get) {
+                return Expr.Set(expr.`object`, expr.name, value)
+            }
+
+            error(equals, "Invalid assignment target.")
+        }
+
+        return expr
+    }
+
+    private fun or(): Expr {
+        var expr = and()
+
+        while (match(OR)) {
+            val operator = previous()
+            val right = and()
+            expr = Expr.Logical(expr, operator, right)
+        }
+
+        return expr
+    }
+
+    private fun and(): Expr {
+        var expr = equality()
+
+        while (match(AND)) {
+            val operator = previous()
+            val right = equality()
+            expr = Expr.Logical(expr, operator, right)
+        }
+
+        return expr
+    }
+
+    private fun equality(): Expr {
+        var expr = comparison()
+
+        while (match(BANG_EQUAL) || match(EQUAL_EQUAL)) {
+            val operator = previous()
+            val right = comparison()
+            expr = Expr.Binary(expr, operator, right)
+        }
+
+        return expr
+    }
+
+    private fun comparison(): Expr {
+        var expr = addition()
+
+        while (match(GREATER) || match(GREATER_EQUAL) || match(LESS) || match(LESS_EQUAL)) {
+            val operator = previous()
+            val right = addition()
+            expr = Expr.Binary(expr, operator, right)
+        }
+
+        return expr
+    }
+
+    private fun addition(): Expr {
+        var expr = multiplication()
+
+        while (match(PLUS) || match(MINUS)) {
+            val operator = previous()
+            val right = multiplication()
+            expr = Expr.Binary(expr, operator, right)
+        }
+
+        return expr
+    }
+
+    private fun multiplication(): Expr {
+        var expr = unary()
+
+        while (match(SLASH) || match(STAR)) {
+            val operator = previous()
+            val right = unary()
+            expr = Expr.Binary(expr, operator, right)
+        }
+
+        return expr
+    }
+
+    private fun unary(): Expr {
+        if (match(BANG) || match(MINUS)) {
+            val operator = previous()
+            val right = unary()
+            return Expr.Unary(operator, right)
+        }
+
+        return call()
+    }
+
+    private fun call(): Expr {
+        var expr = primary()
+
+        while (true) {
+            if (match(LEFT_PAREN)) {
+                expr = finishCall(expr)
+            } else if (match(DOT)) {
+                val name = consume(IDENTIFIER, "Expect property name after '.'.")
+                expr = Expr.Get(expr, name)
+            } else {
+                break
+            }
+        }
+
+        return expr
+    }
+
+    private fun finishCall(callee: Expr): Expr {
+        val arguments = mutableListOf<Expr>()
+        if (!check(RIGHT_PAREN)) {
+            do {
+                if (arguments.size >= 8) {
+                    error(peek(), "Cannot have more than 8 arguments.")
+                }
+                arguments.add(expression())
+            } while (match(COMMA))
+        }
+
+        val paren = consume(RIGHT_PAREN, "Expect ')' after arguments.")
+
+        return Expr.Call(callee, paren, arguments)
+    }
+
+    private fun primary(): Expr {
+        return when {
+            match(FALSE) -> Expr.Literal(false)
+            match(TRUE) -> Expr.Literal(true)
+            match(NIL) -> Expr.Literal(null)
+            match(NUMBER) || match(STRING) -> Expr.Literal(previous().literal)
+            match(SUPER) -> {
+                val keyword = previous()
+                consume(DOT, "Expect '.' after 'super'.")
+                val method = consume(IDENTIFIER, "Expect super class method name.")
+
+                Expr.Super(keyword, method)
+            }
+
+            match(THIS) -> Expr.This(previous())
+            match(IDENTIFIER) -> Expr.Variable(previous())
+            match(LEFT_PAREN) -> {
+                val expr = expression()
+                consume(RIGHT_PAREN, "Expect ')' after expression.")
+
+                Expr.Grouping(expr)
+            }
+
+            else -> throw error(peek(), "Expect expression.")
+        }
     }
 
     private fun classDeclaration(): Stmt {
