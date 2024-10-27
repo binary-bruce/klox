@@ -43,7 +43,7 @@ data class Environment(val enclosing: Environment? = null) {
         return environment
     }
 
-    fun getAt(distance: Int, name: String?): Any? {
+    fun getAt(distance: Int, name: String): Any? {
         return ancestor(distance).values[name]
     }
 
