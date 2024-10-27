@@ -29,4 +29,17 @@ class StatementParserTest {
             parse("if (a == 0) true; else { false; }")
         )
     }
+
+    @Test
+    fun `test print`() {
+        assertEquals(
+            "Print(expression=Literal(value=100.0))",
+            parse("print 100;")
+        )
+
+        assertEquals(
+            "Print(expression=Binary(left=Literal(value=1.0), operator=PLUS + null, right=Literal(value=1.0)))",
+            parse("print 1 + 1;")
+        )
+    }
 }
