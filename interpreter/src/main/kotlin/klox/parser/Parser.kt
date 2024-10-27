@@ -25,8 +25,26 @@ class Parser(private val tokens: List<Token>) {
         when {
             match(FUN) -> return function(FunctionKind.FUNCTION)
             match(CLASS) -> return classDeclaration()
+            match(VAR) -> return varDeclaration()
         }
 
+        throw NotImplementedError()
+    }
+
+    private fun varDeclaration(): Stmt {
+        val name = consume(IDENTIFIER, "Expect variable name.")
+
+        val initializer = if (match(EQUAL)) {
+            expression()
+        } else {
+            null
+        }
+        consume(SEMICOLON, "Expect ';' after variable declaration.")
+
+        return Stmt.Var(name, initializer)
+    }
+
+    private fun expression(): Expr {
         throw NotImplementedError()
     }
 
