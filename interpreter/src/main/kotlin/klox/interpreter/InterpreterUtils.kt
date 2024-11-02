@@ -1,5 +1,6 @@
-package klox
+package klox.interpreter
 
+import klox.RuntimeError
 import klox.scanner.Token
 
 object InterpreterUtils {

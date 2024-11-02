@@ -1,7 +1,9 @@
-package klox
+package klox.interpreter
 
-import klox.InterpreterUtils.checkNumberOperands
-import klox.InterpreterUtils.isEqual
+import klox.interpreter.InterpreterUtils.checkNumberOperands
+import klox.interpreter.InterpreterUtils.isEqual
+import klox.Lox
+import klox.RuntimeError
 import klox.ast.Expr
 import klox.ast.Stmt
 import klox.resolver.Environment
