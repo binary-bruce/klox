@@ -2,100 +2,54 @@ package klox.resolver
 
 import klox.Interpreter
 import klox.ast.Expr
-import klox.ast.Stmt
 
-class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Void>, Stmt.Visitor<Void> {
+class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit> {
 
-    fun resolve(statements: List<Stmt>) {
-        statements.forEach { resolve(it) }
+    override fun <R> visitAssignExpr(expr: Expr.Assign): R {
+        return Unit as R
     }
 
-    private fun resolve(statement: Stmt) {
-        statement.accept(this)
+    override fun <R> visitBinaryExpr(expr: Expr.Binary): R {
+        return Unit as R
     }
 
-    override fun <R> visit(expr: Expr.Assign): R {
-        TODO("Not yet implemented")
+    override fun <R> visitCallExpr(expr: Expr.Call): R {
+        return Unit as R
     }
 
-    override fun <R> visit(expr: Expr.Binary): R {
-        TODO("Not yet implemented")
+    override fun <R> visitGetExpr(expr: Expr.Get): R {
+        return Unit as R
     }
 
-    override fun <R> visit(expr: Expr.Call): R {
-        TODO("Not yet implemented")
+    override fun <R> visitGroupingExpr(expr: Expr.Grouping): R {
+        return Unit as R
     }
 
-    override fun <R> visit(expr: Expr.Get): R {
-        TODO("Not yet implemented")
+    override fun <R> visitLiteralExpr(expr: Expr.Literal): R {
+        return Unit as R
     }
 
-    override fun <R> visit(expr: Expr.Grouping): R {
-        TODO("Not yet implemented")
+    override fun <R> visitLogicalExpr(expr: Expr.Logical): R {
+        return Unit as R
     }
 
-    override fun <R> visit(expr: Expr.Literal): R {
-        TODO("Not yet implemented")
+    override fun <R> visitSetExpr(expr: Expr.Set): R {
+        return Unit as R
     }
 
-    override fun <R> visit(expr: Expr.Logical): R {
-        TODO("Not yet implemented")
+    override fun <R> visitSuperExpr(expr: Expr.Super): R {
+        return Unit as R
     }
 
-    override fun <R> visit(expr: Expr.Set): R {
-        TODO("Not yet implemented")
+    override fun <R> visitThisExpr(expr: Expr.This): R {
+        return Unit as R
     }
 
-    override fun <R> visit(expr: Expr.Super): R {
-        TODO("Not yet implemented")
+    override fun <R> visitUnaryExpr(expr: Expr.Unary): R {
+        return Unit as R
     }
 
-    override fun <R> visit(expr: Expr.This): R {
-        TODO("Not yet implemented")
+    override fun <R> visitVariableExpr(expr: Expr.Variable): R {
+        return Unit as R
     }
-
-    override fun <R> visit(expr: Expr.Unary): R {
-        TODO("Not yet implemented")
-    }
-
-    override fun <R> visit(expr: Expr.Variable): R {
-        TODO("Not yet implemented")
-    }
-
-    override fun <R> visit(expr: Stmt.Block): R {
-        TODO("Not yet implemented")
-    }
-
-    override fun <R> visit(expr: Stmt.Class): R {
-        TODO("Not yet implemented")
-    }
-
-    override fun <R> visit(expr: Stmt.Function): R {
-        TODO("Not yet implemented")
-    }
-
-    override fun <R> visit(expr: Stmt.Expression): R {
-        TODO("Not yet implemented")
-    }
-
-    override fun <R> visit(expr: Stmt.If): R {
-        TODO("Not yet implemented")
-    }
-
-    override fun <R> visit(expr: Stmt.Print): R {
-        TODO("Not yet implemented")
-    }
-
-    override fun <R> visit(expr: Stmt.Return): R {
-        TODO("Not yet implemented")
-    }
-
-    override fun <R> visit(expr: Stmt.Var): R {
-        TODO("Not yet implemented")
-    }
-
-    override fun <R> visit(expr: Stmt.While): R {
-        TODO("Not yet implemented")
-    }
-
 }

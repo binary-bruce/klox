@@ -16,87 +16,88 @@ class Interpreter : Expr.Visitor<Any>, Stmt.Visitor<Void> {
         statement.accept(this)
     }
 
-    override fun <R> visit(expr: Expr.Assign): R {
+    override fun <R> visitAssignExpr(expr: Expr.Assign): R {
         TODO("Not yet implemented")
     }
 
-    override fun <R> visit(expr: Expr.Binary): R {
+    override fun <R> visitBinaryExpr(expr: Expr.Binary): R {
         TODO("Not yet implemented")
     }
 
-    override fun <R> visit(expr: Expr.Call): R {
+    override fun <R> visitCallExpr(expr: Expr.Call): R {
         TODO("Not yet implemented")
     }
 
-    override fun <R> visit(expr: Expr.Get): R {
+    override fun <R> visitGetExpr(expr: Expr.Get): R {
         TODO("Not yet implemented")
     }
 
-    override fun <R> visit(expr: Expr.Grouping): R {
+    override fun <R> visitGroupingExpr(expr: Expr.Grouping): R {
         TODO("Not yet implemented")
     }
 
-    override fun <R> visit(expr: Expr.Literal): R {
+    override fun <R> visitLiteralExpr(expr: Expr.Literal): R {
         TODO("Not yet implemented")
     }
 
-    override fun <R> visit(expr: Expr.Logical): R {
+    override fun <R> visitLogicalExpr(expr: Expr.Logical): R {
         TODO("Not yet implemented")
     }
 
-    override fun <R> visit(expr: Expr.Set): R {
+    override fun <R> visitSetExpr(expr: Expr.Set): R {
         TODO("Not yet implemented")
     }
 
-    override fun <R> visit(expr: Expr.Super): R {
+    override fun <R> visitSuperExpr(expr: Expr.Super): R {
         TODO("Not yet implemented")
     }
 
-    override fun <R> visit(expr: Expr.This): R {
+    override fun <R> visitThisExpr(expr: Expr.This): R {
         TODO("Not yet implemented")
     }
 
-    override fun <R> visit(expr: Expr.Unary): R {
+    override fun <R> visitUnaryExpr(expr: Expr.Unary): R {
         TODO("Not yet implemented")
     }
 
-    override fun <R> visit(expr: Expr.Variable): R {
+    override fun <R> visitVariableExpr(expr: Expr.Variable): R {
         TODO("Not yet implemented")
     }
 
-    override fun <R> visit(expr: Stmt.Block): R {
+    override fun <R> visitBlockStmt(stmt: Stmt.Block): R {
         TODO("Not yet implemented")
     }
 
-    override fun <R> visit(expr: Stmt.Class): R {
+    override fun <R> visitClassStmt(stmt: Stmt.Class): R {
         TODO("Not yet implemented")
     }
 
-    override fun <R> visit(expr: Stmt.Function): R {
+    override fun <R> visitFunctionStmt(stmt: Stmt.Function): R {
         TODO("Not yet implemented")
     }
 
-    override fun <R> visit(expr: Stmt.Expression): R {
+    override fun <R> visitExpressionStmt(stmt: Stmt.Expression): R {
         TODO("Not yet implemented")
     }
 
-    override fun <R> visit(expr: Stmt.If): R {
+    override fun <R> visitIfStmt(stmt: Stmt.If): R {
         TODO("Not yet implemented")
     }
 
-    override fun <R> visit(expr: Stmt.Print): R {
+    override fun <R> visitPrintStmt(stmt: Stmt.Print): R {
         TODO("Not yet implemented")
     }
 
-    override fun <R> visit(expr: Stmt.Return): R {
+    override fun <R> visitReturnStmt(stmt: Stmt.Return): R {
         TODO("Not yet implemented")
     }
 
-    override fun <R> visit(expr: Stmt.Var): R {
+    override fun <R> visitVarStmt(stmt: Stmt.Var): R {
         TODO("Not yet implemented")
     }
 
-    override fun <R> visit(expr: Stmt.While): R {
+    override fun <R> visitWhileStmt(stmt: Stmt.While): R {
         TODO("Not yet implemented")
     }
+
 }
