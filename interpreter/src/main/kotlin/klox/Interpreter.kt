@@ -1,10 +1,16 @@
 package klox
 
+import klox.InterpreterUtils.checkNumberOperands
+import klox.InterpreterUtils.isEqual
 import klox.ast.Expr
 import klox.ast.Stmt
+import klox.resolver.Environment
+import klox.scanner.TokenType
 
 class Interpreter : Expr.Visitor<Any>, Stmt.Visitor<Void> {
     private val locals = mutableMapOf<Expr, Int>()
+    private val globals = Environment()
+    private val environment: Environment = globals
 
     fun interpret(statements: List<Stmt>) {
         try {
@@ -22,12 +28,75 @@ class Interpreter : Expr.Visitor<Any>, Stmt.Visitor<Void> {
         statement.accept(this)
     }
 
+    private fun evaluate(expr: Expr): Any {
+        return expr.accept(this)
+    }
+
     override fun <R> visitAssignExpr(expr: Expr.Assign): R {
-        TODO("Not yet implemented")
+        val value = evaluate(expr.value)
+        val distance = locals[expr]
+        if (distance != null) {
+            environment.assignAt(distance, expr.name, value)
+        } else {
+            globals.assign(expr.name, value)
+        }
+
+        return value as R
     }
 
     override fun <R> visitBinaryExpr(expr: Expr.Binary): R {
-        TODO("Not yet implemented")
+        val left = evaluate(expr.left)
+        val right = evaluate(expr.right)
+        return when (expr.operator.type) {
+            TokenType.BANG_EQUAL -> !isEqual(left, right)
+            TokenType.EQUAL_EQUAL -> isEqual(left, right)
+            TokenType.GREATER -> {
+                checkNumberOperands(expr.operator, left, right)
+                left as Double > right as Double
+            }
+
+            TokenType.GREATER_EQUAL -> {
+                checkNumberOperands(expr.operator, left, right)
+                left as Double >= right as Double
+            }
+
+            TokenType.LESS -> {
+                checkNumberOperands(expr.operator, left, right)
+                (left as Double) < (right as Double)
+            }
+
+            TokenType.LESS_EQUAL -> {
+                checkNumberOperands(expr.operator, left, right)
+                left as Double <= right as Double
+            }
+
+            TokenType.MINUS -> {
+                checkNumberOperands(expr.operator, left, right)
+                left as Double - right as Double
+            }
+
+            TokenType.PLUS -> {
+                if (left is Double && right is Double) {
+                    left + right
+                }
+                if (left is String && right is String) {
+                    left + right
+                }
+                throw RuntimeError(expr.operator, "Operands must be two numbers or two strings.")
+            }
+
+            TokenType.SLASH -> {
+                checkNumberOperands(expr.operator, left, right)
+                left as Double / right as Double
+            }
+
+            TokenType.STAR -> {
+                checkNumberOperands(expr.operator, left, right)
+                left as Double * right as Double
+            }
+
+            else -> null
+        } as R
     }
 
     override fun <R> visitCallExpr(expr: Expr.Call): R {
