@@ -1,6 +1,6 @@
 package klox.resolver
 
-import klox.Interpreter
+import klox.interpreter.Interpreter
 import klox.Lox
 import klox.ast.Expr
 import klox.ast.Stmt

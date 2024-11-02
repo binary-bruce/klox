@@ -1,6 +1,7 @@
 package klox
 
 import klox.ast.Stmt
+import klox.interpreter.Interpreter
 import klox.parser.Parser
 import klox.resolver.Resolver
 import klox.scanner.Scanner
