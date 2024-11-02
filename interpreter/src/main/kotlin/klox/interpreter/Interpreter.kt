@@ -1,11 +1,11 @@
 package klox.interpreter
 
-import klox.interpreter.InterpreterUtils.checkNumberOperands
-import klox.interpreter.InterpreterUtils.isEqual
 import klox.Lox
 import klox.RuntimeError
 import klox.ast.Expr
 import klox.ast.Stmt
+import klox.interpreter.InterpreterUtils.checkNumberOperands
+import klox.interpreter.InterpreterUtils.isEqual
 import klox.resolver.Environment
 import klox.scanner.TokenType
 
@@ -102,7 +102,22 @@ class Interpreter : Expr.Visitor<Any>, Stmt.Visitor<Void> {
     }
 
     override fun <R> visitCallExpr(expr: Expr.Call): R {
-        TODO("Not yet implemented")
+        val callee = evaluate(expr.callee)
+        val arguments: List<Any> = expr.arguments.map { evaluate(it) }
+
+        if (callee !is LoxCallable) {
+            throw RuntimeError(expr.paren, "Can only call functions and classes.")
+        }
+
+        val function = callee
+        if (arguments.size != function.arity()) {
+            throw RuntimeError(
+                expr.paren,
+                "Expected " + function.arity() + " arguments but got " + arguments.size + "."
+            )
+        }
+
+        return function.call(this, arguments) as R
     }
 
     override fun <R> visitGetExpr(expr: Expr.Get): R {
