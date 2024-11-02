@@ -3,19 +3,36 @@ package klox.resolver
 import klox.Interpreter
 import klox.Lox
 import klox.ast.Expr
+import klox.ast.Stmt
 import klox.scanner.Token
 import java.lang.Boolean.FALSE
 import java.util.*
 
-class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit> {
+class Resolver(private val interpreter: Interpreter) : Stmt.Visitor<Unit>, Expr.Visitor<Unit> {
     private val scopes = Stack<MutableMap<String, Boolean>>()
 
-    private var currentClass: ClassType = ClassType.NONE
+    private var currentClass = ClassType.NONE
+    private var currentFunction = FunctionType.NONE
 
     private enum class ClassType {
         NONE,
         CLASS,
         SUBCLASS
+    }
+
+    private enum class FunctionType {
+        NONE,
+        FUNCTION,
+        INITIALIZER,
+        METHOD
+    }
+
+    fun resolve(statements: List<Stmt>) {
+        statements.forEach { resolve(it) }
+    }
+
+    private fun resolve(stmt: Stmt) {
+        stmt.accept(this)
     }
 
     private fun resolve(expr: Expr) {
@@ -31,6 +48,37 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit> {
         }
 
         // Not found. Assume it is global.
+    }
+
+    private fun resolveFunction(function: Stmt.Function, type: FunctionType) {
+        val enclosingFunction = currentFunction
+        currentFunction = type
+        beginScope()
+        function.parameters.forEach { declare(it); define(it) }
+        resolve(function.body)
+        endScope()
+        currentFunction = enclosingFunction
+    }
+
+    private fun beginScope() {
+        scopes.push(HashMap())
+    }
+
+    private fun endScope() {
+        scopes.pop()
+    }
+
+    private fun declare(name: Token) {
+        if (scopes.isEmpty()) return
+        if (scopes.peek().containsKey(name.lexeme)) {
+            Lox.error(name, "Variable with this name already declared in this scope.")
+        }
+        scopes.peek()[name.lexeme] = false
+    }
+
+    private fun define(name: Token) {
+        if (scopes.isEmpty()) return
+        scopes.peek()[name.lexeme] = true
     }
 
     override fun <R> visitAssignExpr(expr: Expr.Assign): R {
@@ -109,6 +157,99 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit> {
         }
 
         resolveLocal(expr, expr.name)
+        return Unit as R
+    }
+
+    override fun <R> visitBlockStmt(stmt: Stmt.Block): R {
+        beginScope()
+        resolve(stmt.statements)
+        endScope()
+        return Unit as R
+    }
+
+    override fun <R> visitClassStmt(stmt: Stmt.Class): R {
+        declare(stmt.name)
+        define(stmt.name)
+
+        val enclosingClass = currentClass
+        currentClass = ClassType.CLASS
+
+        if (stmt.superClass != null) {
+            currentClass = ClassType.SUBCLASS
+            resolve(stmt.superClass)
+            beginScope()
+            scopes.peek()["super"] = true
+        }
+
+        beginScope()
+        scopes.peek()["this"] = true
+
+        stmt.methods.forEach {
+            var declaration = FunctionType.METHOD
+            if (it.name.lexeme == "init") {
+                declaration = FunctionType.INITIALIZER
+            }
+            resolveFunction(it, declaration)
+        }
+
+        endScope()
+
+        if (stmt.superClass != null) endScope()
+
+        currentClass = enclosingClass
+        return Unit as R
+    }
+
+    override fun <R> visitFunctionStmt(stmt: Stmt.Function): R {
+        declare(stmt.name)
+        define(stmt.name)
+
+        resolveFunction(stmt, FunctionType.FUNCTION)
+        return Unit as R
+    }
+
+    override fun <R> visitExpressionStmt(stmt: Stmt.Expression): R {
+        resolve(stmt.expression)
+        return Unit as R
+    }
+
+    override fun <R> visitIfStmt(stmt: Stmt.If): R {
+        resolve(stmt.condition)
+        resolve(stmt.thenBranch)
+        if (stmt.elseBranch != null) resolve(stmt.elseBranch)
+        return Unit as R
+    }
+
+    override fun <R> visitPrintStmt(stmt: Stmt.Print): R {
+        resolve(stmt.expression)
+        return Unit as R
+    }
+
+    override fun <R> visitReturnStmt(stmt: Stmt.Return): R {
+        if (currentFunction == FunctionType.NONE) {
+            Lox.error(stmt.keyword, "Cannot return from top-level code.")
+        }
+        if (stmt.value != null) {
+            if (currentFunction == FunctionType.INITIALIZER) {
+                Lox.error(stmt.keyword, "Cannot return a value from an initializer.")
+            }
+            resolve(stmt.value)
+        }
+        return Unit as R
+    }
+
+    override fun <R> visitVarStmt(stmt: Stmt.Var): R {
+        declare(stmt.name)
+        if (stmt.initializer != null) {
+            resolve(stmt.initializer)
+        }
+        define(stmt.name)
+        return Unit as R
+    }
+
+    override fun <R> visitWhileStmt(stmt: Stmt.While): R {
+        resolve(stmt.condition)
+        resolve(stmt.body)
         return Unit as R
     }
 }
