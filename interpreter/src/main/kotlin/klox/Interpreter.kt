@@ -4,12 +4,18 @@ import klox.ast.Expr
 import klox.ast.Stmt
 
 class Interpreter : Expr.Visitor<Any>, Stmt.Visitor<Void> {
+    private val locals = mutableMapOf<Expr, Int>()
+
     fun interpret(statements: List<Stmt>) {
         try {
             statements.forEach { execute(it) }
         } catch (e: RuntimeError) {
             Lox.runtimeError(e)
         }
+    }
+
+    fun resolve(expr: Expr, depth: Int) {
+        locals[expr] = depth
     }
 
     private fun execute(statement: Stmt) {
