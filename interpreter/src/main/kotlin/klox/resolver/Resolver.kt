@@ -28,9 +28,7 @@ class Resolver(private val interpreter: Interpreter) : Stmt.Visitor<Unit>, Expr.
     }
 
     fun resolve(statements: List<Stmt>) {
-        for (statement in statements) {
-            resolve(statement)
-        }
+        statements.forEach { resolve(it) }
     }
 
     private fun resolve(stmt: Stmt) {
@@ -56,10 +54,7 @@ class Resolver(private val interpreter: Interpreter) : Stmt.Visitor<Unit>, Expr.
         val enclosingFunction = currentFunction
         currentFunction = type
         beginScope()
-        for (param in function.parameters) {
-            declare(param)
-            define(param)
-        }
+        function.parameters.forEach { declare(it); define(it) }
         resolve(function.body)
         endScope()
         currentFunction = enclosingFunction
@@ -189,12 +184,12 @@ class Resolver(private val interpreter: Interpreter) : Stmt.Visitor<Unit>, Expr.
         beginScope()
         scopes.peek()["this"] = true
 
-        for (method in stmt.methods) {
+        stmt.methods.forEach {
             var declaration = FunctionType.METHOD
-            if (method.name.lexeme == "init") {
+            if (it.name.lexeme == "init") {
                 declaration = FunctionType.INITIALIZER
             }
-            resolveFunction(method, declaration)
+            resolveFunction(it, declaration)
         }
 
         endScope()
