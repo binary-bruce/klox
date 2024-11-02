@@ -4,9 +4,12 @@ import klox.Lox
 import klox.RuntimeError
 import klox.ast.Expr
 import klox.ast.Stmt
+import klox.interpreter.InterpreterUtils.checkNumberOperand
 import klox.interpreter.InterpreterUtils.checkNumberOperands
 import klox.interpreter.InterpreterUtils.isEqual
+import klox.interpreter.InterpreterUtils.isTruthy
 import klox.resolver.Environment
+import klox.scanner.Token
 import klox.scanner.TokenType
 
 class Interpreter : Expr.Visitor<Any>, Stmt.Visitor<Void> {
@@ -30,8 +33,21 @@ class Interpreter : Expr.Visitor<Any>, Stmt.Visitor<Void> {
         statement.accept(this)
     }
 
+    fun executeBlock(statements: List<Stmt>, environment: Environment) {
+
+    }
+
     private fun evaluate(expr: Expr): Any {
         return expr.accept(this)
+    }
+
+    private fun lookUpVariable(name: Token, expr: Expr): Any? {
+        val distance = locals[expr]
+        return if (distance != null) {
+            environment.getAt(distance, name.lexeme)
+        } else {
+            globals.get(name)
+        }
     }
 
     override fun <R> visitAssignExpr(expr: Expr.Assign): R {
@@ -121,39 +137,78 @@ class Interpreter : Expr.Visitor<Any>, Stmt.Visitor<Void> {
     }
 
     override fun <R> visitGetExpr(expr: Expr.Get): R {
-        TODO("Not yet implemented")
+        val `object` = evaluate(expr.`object`)
+        if (`object` is LoxInstance) {
+            return `object`[expr.name] as R
+        }
+
+        throw RuntimeError(expr.name, "Only instances have properties.")
     }
 
     override fun <R> visitGroupingExpr(expr: Expr.Grouping): R {
-        TODO("Not yet implemented")
+        return evaluate(expr.expression) as R
     }
 
     override fun <R> visitLiteralExpr(expr: Expr.Literal): R {
-        TODO("Not yet implemented")
+        return expr.value as R
     }
 
     override fun <R> visitLogicalExpr(expr: Expr.Logical): R {
-        TODO("Not yet implemented")
+        val left = evaluate(expr.left)
+
+        if (expr.operator.type === TokenType.OR) {
+            if (isTruthy(left)) return left as R
+        } else {
+            if (!isTruthy(left)) return left as R
+        }
+
+        return evaluate(expr.right) as R
     }
 
     override fun <R> visitSetExpr(expr: Expr.Set): R {
-        TODO("Not yet implemented")
+        val `object` = evaluate(expr.`object`) as? LoxInstance ?: throw RuntimeError(
+            expr.name,
+            "Only instances have fields."
+        )
+
+        val value = evaluate(expr.value)
+        `object`[expr.name] = value
+        return value as R
     }
 
     override fun <R> visitSuperExpr(expr: Expr.Super): R {
-        TODO("Not yet implemented")
+        val distance = locals[expr]!!
+        val superclass = environment.getAt(distance, "super") as LoxClass?
+
+        // "this" is always one level nearer that "super"'s environment.
+
+        // "this" is always one level nearer that "super"'s environment.
+        val `object` = environment.getAt(distance - 1, "this") as LoxInstance?
+
+        return superclass!!.findMethod(`object`!!, expr.method.lexeme) as R
+            ?: throw RuntimeError(expr.method, "Undefined property '" + expr.method.lexeme + "'.")
     }
 
     override fun <R> visitThisExpr(expr: Expr.This): R {
-        TODO("Not yet implemented")
+        return lookUpVariable(expr.keyword, expr) as R
     }
 
     override fun <R> visitUnaryExpr(expr: Expr.Unary): R {
-        TODO("Not yet implemented")
+        val right = evaluate(expr.right)
+
+        return when (expr.operator.type) {
+            TokenType.BANG -> !isTruthy(right)
+            TokenType.MINUS -> {
+                checkNumberOperand(expr.operator, right)
+                -(right as Double)
+            }
+
+            else -> null
+        } as R
     }
 
     override fun <R> visitVariableExpr(expr: Expr.Variable): R {
-        TODO("Not yet implemented")
+        return lookUpVariable(expr.name, expr) as R
     }
 
     override fun <R> visitBlockStmt(stmt: Stmt.Block): R {
