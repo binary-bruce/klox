@@ -104,11 +104,11 @@ class Interpreter : Expr.Visitor<Any>, Stmt.Visitor<Void> {
             TokenType.PLUS -> {
                 if (left is Double && right is Double) {
                     left + right
-                }
-                if (left is String && right is String) {
+                } else if (left is String && right is String) {
                     left + right
+                } else {
+                    throw RuntimeError(expr.operator, "Operands must be two numbers or two strings.")
                 }
-                throw RuntimeError(expr.operator, "Operands must be two numbers or two strings.")
             }
 
             TokenType.SLASH -> {
