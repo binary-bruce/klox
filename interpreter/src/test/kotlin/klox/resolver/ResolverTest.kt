@@ -10,7 +10,6 @@ class ResolverTest {
         private val locals = mutableMapOf<Expr, Int>()
 
         override fun resolve(expr: Expr, depth: Int) {
-            // println("RESOLVING $expr")
             locals[expr] = depth
         }
 

@@ -205,7 +205,6 @@ class Resolver(
     }
 
     override fun <R> visitFunctionStmt(stmt: Stmt.Function): R {
-        println("RESOLVING $stmt")
         declare(stmt.name)
         define(stmt.name)
         resolveFunction(stmt, FunctionType.FUNCTION)
