@@ -4,15 +4,11 @@ import klox.Return
 import klox.ast.Stmt
 import klox.resolver.Environment
 
-
-internal class LoxFunction(declaration: Stmt.Function, closure: Environment, private val isInitializer: Boolean) : LoxCallable {
-    private val declaration: Stmt.Function
-    private val closure: Environment
-
-    init {
-        this.closure = closure
-        this.declaration = declaration
-    }
+internal class LoxFunction(
+    private val declaration: Stmt.Function,
+    private val closure: Environment,
+    private val isInitializer: Boolean,
+) : LoxCallable {
 
     fun bind(instance: LoxInstance): LoxFunction {
         val environment = Environment(closure)
@@ -38,7 +34,12 @@ internal class LoxFunction(declaration: Stmt.Function, closure: Environment, pri
         } catch (returnValue: Return) {
             return returnValue.value
         }
-        return (if (isInitializer) closure.getAt(0, "this") else null) as Any
+
+        return if (isInitializer) {
+            closure.getAt(0, "this")
+        } else {
+            null
+        } as Any
     }
 }
 

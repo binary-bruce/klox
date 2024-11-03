@@ -125,15 +125,11 @@ class Interpreter : Expr.Visitor<Any>, Stmt.Visitor<Void> {
             throw RuntimeError(expr.paren, "Can only call functions and classes.")
         }
 
-        val function = callee
-        if (arguments.size != function.arity()) {
-            throw RuntimeError(
-                expr.paren,
-                "Expected " + function.arity() + " arguments but got " + arguments.size + "."
-            )
+        if (arguments.size != callee.arity()) {
+            throw RuntimeError(expr.paren, "Expected ${callee.arity()} arguments but got ${arguments.size}.")
         }
 
-        return function.call(this, arguments) as R
+        return callee.call(this, arguments) as R
     }
 
     override fun <R> visitGetExpr(expr: Expr.Get): R {
@@ -166,10 +162,8 @@ class Interpreter : Expr.Visitor<Any>, Stmt.Visitor<Void> {
     }
 
     override fun <R> visitSetExpr(expr: Expr.Set): R {
-        val `object` = evaluate(expr.`object`) as? LoxInstance ?: throw RuntimeError(
-            expr.name,
-            "Only instances have fields."
-        )
+        val `object` = evaluate(expr.`object`) as? LoxInstance
+            ?: throw RuntimeError(expr.name, "Only instances have fields.")
 
         val value = evaluate(expr.value)
         `object`[expr.name] = value
@@ -186,7 +180,7 @@ class Interpreter : Expr.Visitor<Any>, Stmt.Visitor<Void> {
         val `object` = environment.getAt(distance - 1, "this") as LoxInstance?
 
         return superclass!!.findMethod(`object`!!, expr.method.lexeme) as R
-            ?: throw RuntimeError(expr.method, "Undefined property '" + expr.method.lexeme + "'.")
+            ?: throw RuntimeError(expr.method, "Undefined property '${expr.method.lexeme}'.")
     }
 
     override fun <R> visitThisExpr(expr: Expr.This): R {

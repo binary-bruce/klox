@@ -1,18 +1,17 @@
 package klox.interpreter
 
 
-internal class LoxClass(val name: String, val superclass: LoxClass?, methods: Map<String, LoxFunction>) : LoxCallable {
-    private val methods: Map<String, LoxFunction>
-
-    init {
-        this.methods = methods
-    }
+internal class LoxClass(
+    private val name: String,
+    private val superClass: LoxClass?,
+    private val methods: Map<String, LoxFunction>,
+) : LoxCallable {
 
     fun findMethod(instance: LoxInstance, name: String): LoxFunction? {
         return if (methods.containsKey(name)) {
             methods[name]!!.bind(instance)
         } else {
-            superclass?.findMethod(instance, name)
+            superClass?.findMethod(instance, name)
         }
     }
 
@@ -24,6 +23,7 @@ internal class LoxClass(val name: String, val superclass: LoxClass?, methods: Ma
         val instance = LoxInstance(this)
         val initializer: LoxFunction? = methods["init"]
         initializer?.bind(instance)?.call(interpreter, arguments)
+
         return instance
     }
 
