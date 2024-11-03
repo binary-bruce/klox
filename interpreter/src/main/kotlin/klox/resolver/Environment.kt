@@ -4,7 +4,7 @@ import klox.RuntimeError
 import klox.scanner.Token
 
 data class Environment(val enclosing: Environment? = null) {
-    private val values = mutableMapOf<String, Any>()
+    private val values = mutableMapOf<String, Any?>()
 
     fun get(name: Token): Any {
         if (values.containsKey(name.lexeme)) {
@@ -30,7 +30,7 @@ data class Environment(val enclosing: Environment? = null) {
         throw RuntimeError(name, "Undefined variable '${name.lexeme}'.")
     }
 
-    fun define(name: String, value: Any) {
+    fun define(name: String, value: Any?) {
         values[name] = value
     }
 

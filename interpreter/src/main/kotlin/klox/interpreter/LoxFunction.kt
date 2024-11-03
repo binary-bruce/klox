@@ -24,7 +24,7 @@ internal class LoxFunction(
         return declaration.parameters.size
     }
 
-    override fun call(interpreter: Interpreter, arguments: List<Any>): Any {
+    override fun call(interpreter: Interpreter, arguments: List<Any>): Any? {
         val environment = Environment(closure)
         for (i in 0 until declaration.parameters.size) {
             environment.define(declaration.parameters[i].lexeme, arguments[i])
@@ -39,7 +39,7 @@ internal class LoxFunction(
             closure.getAt(0, "this")
         } else {
             null
-        } as Any
+        }
     }
 }
 

@@ -1,6 +1,7 @@
 package klox.interpreter
 
 import klox.Lox
+import klox.Return
 import klox.RuntimeError
 import klox.ast.Expr
 import klox.ast.Stmt
@@ -8,6 +9,7 @@ import klox.interpreter.InterpreterUtils.checkNumberOperand
 import klox.interpreter.InterpreterUtils.checkNumberOperands
 import klox.interpreter.InterpreterUtils.isEqual
 import klox.interpreter.InterpreterUtils.isTruthy
+import klox.interpreter.InterpreterUtils.stringify
 import klox.resolver.Environment
 import klox.scanner.Token
 import klox.scanner.TokenType
@@ -15,7 +17,7 @@ import klox.scanner.TokenType
 class Interpreter : Expr.Visitor<Any>, Stmt.Visitor<Void> {
     private val locals = mutableMapOf<Expr, Int>()
     private val globals = Environment()
-    private val environment: Environment = globals
+    private var environment: Environment = globals
 
     fun interpret(statements: List<Stmt>) {
         try {
@@ -34,7 +36,13 @@ class Interpreter : Expr.Visitor<Any>, Stmt.Visitor<Void> {
     }
 
     fun executeBlock(statements: List<Stmt>, environment: Environment) {
-
+        val previous = this.environment
+        try {
+            this.environment = environment
+            statements.forEach { execute(it) }
+        } finally {
+            this.environment = previous
+        }
     }
 
     private fun evaluate(expr: Expr): Any {
@@ -96,11 +104,11 @@ class Interpreter : Expr.Visitor<Any>, Stmt.Visitor<Void> {
             TokenType.PLUS -> {
                 if (left is Double && right is Double) {
                     left + right
-                }
-                if (left is String && right is String) {
+                } else if (left is String && right is String) {
                     left + right
+                } else {
+                    throw RuntimeError(expr.operator, "Operands must be two numbers or two strings.")
                 }
-                throw RuntimeError(expr.operator, "Operands must be two numbers or two strings.")
             }
 
             TokenType.SLASH -> {
@@ -206,39 +214,93 @@ class Interpreter : Expr.Visitor<Any>, Stmt.Visitor<Void> {
     }
 
     override fun <R> visitBlockStmt(stmt: Stmt.Block): R {
-        TODO("Not yet implemented")
+        executeBlock(stmt.statements, Environment(environment))
+        return null as R
     }
 
     override fun <R> visitClassStmt(stmt: Stmt.Class): R {
-        TODO("Not yet implemented")
+        environment.define(stmt.name.lexeme, null)
+        val superClass = if (stmt.superClass != null) {
+            evaluate(stmt.superClass).also {
+                if (it !is LoxClass) throw RuntimeError(stmt.name, "Superclass must be a class.")
+                environment = Environment(environment)
+                environment.define("super", it)
+            }
+        } else {
+            null
+        }
+
+        val methods = mutableMapOf<String, LoxFunction>()
+        stmt.methods.forEach {
+            val function = LoxFunction(it, environment, it.name.lexeme == "init")
+            methods[it.name.lexeme] = function
+        }
+
+        val klass = LoxClass(stmt.name.lexeme, superClass as LoxClass?, methods)
+        if (superClass != null) {
+            environment = environment.enclosing!!
+        }
+        environment.assign(stmt.name, klass)
+
+        return null as R
     }
 
     override fun <R> visitFunctionStmt(stmt: Stmt.Function): R {
-        TODO("Not yet implemented")
+        val function = LoxFunction(stmt, environment, false)
+        environment.define(stmt.name.lexeme, function)
+        return null as R
     }
 
     override fun <R> visitExpressionStmt(stmt: Stmt.Expression): R {
-        TODO("Not yet implemented")
+        evaluate(stmt.expression)
+        return null as R
     }
 
     override fun <R> visitIfStmt(stmt: Stmt.If): R {
-        TODO("Not yet implemented")
+        if (isTruthy(evaluate(stmt.condition))) {
+            execute(stmt.thenBranch)
+        } else if (stmt.elseBranch != null) {
+            execute(stmt.elseBranch)
+        }
+
+        return null as R
     }
 
     override fun <R> visitPrintStmt(stmt: Stmt.Print): R {
-        TODO("Not yet implemented")
+        val value = evaluate(stmt.expression)
+        println(stringify(value))
+
+        return null as R
     }
 
     override fun <R> visitReturnStmt(stmt: Stmt.Return): R {
-        TODO("Not yet implemented")
+        val value = if (stmt.value != null) {
+            evaluate(stmt.value)
+        } else {
+            null
+        }
+
+        throw Return(value)
     }
 
     override fun <R> visitVarStmt(stmt: Stmt.Var): R {
-        TODO("Not yet implemented")
+        val value = if (stmt.initializer != null) {
+            evaluate(stmt.initializer)
+        } else {
+            null
+        }
+
+        environment.define(stmt.name.lexeme, value)
+
+        return null as R
     }
 
     override fun <R> visitWhileStmt(stmt: Stmt.While): R {
-        TODO("Not yet implemented")
+        while (isTruthy(evaluate(stmt.condition))) {
+            execute(stmt.body)
+        }
+
+        return null as R
     }
 
 }
