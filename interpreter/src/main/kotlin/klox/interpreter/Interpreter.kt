@@ -11,10 +11,11 @@ import klox.interpreter.InterpreterUtils.isEqual
 import klox.interpreter.InterpreterUtils.isTruthy
 import klox.interpreter.InterpreterUtils.stringify
 import klox.resolver.Environment
+import klox.resolver.Resolvable
 import klox.scanner.Token
 import klox.scanner.TokenType
 
-class Interpreter : Expr.Visitor<Any>, Stmt.Visitor<Void> {
+class Interpreter : Expr.Visitor<Any>, Stmt.Visitor<Void>, Resolvable {
     private val locals = mutableMapOf<Expr, Int>()
     private val globals = Environment()
     private var environment: Environment = globals
@@ -27,7 +28,7 @@ class Interpreter : Expr.Visitor<Any>, Stmt.Visitor<Void> {
         }
     }
 
-    fun resolve(expr: Expr, depth: Int) {
+    override fun resolve(expr: Expr, depth: Int) {
         locals[expr] = depth
     }
 

@@ -1,6 +1,5 @@
 package klox.resolver
 
-import klox.interpreter.Interpreter
 import klox.Lox
 import klox.ast.Expr
 import klox.ast.Stmt
@@ -8,7 +7,10 @@ import klox.scanner.Token
 import java.lang.Boolean.FALSE
 import java.util.*
 
-class Resolver(private val interpreter: Interpreter) : Stmt.Visitor<Unit>, Expr.Visitor<Unit> {
+class Resolver(
+    private val interpreter: Resolvable,
+) : Stmt.Visitor<Unit>, Expr.Visitor<Unit> {
+
     private val scopes = Stack<MutableMap<String, Boolean>>()
 
     private var currentClass = ClassType.NONE
@@ -53,15 +55,17 @@ class Resolver(private val interpreter: Interpreter) : Stmt.Visitor<Unit>, Expr.
     private fun resolveFunction(function: Stmt.Function, type: FunctionType) {
         val enclosingFunction = currentFunction
         currentFunction = type
+
         beginScope()
         function.parameters.forEach { declare(it); define(it) }
         resolve(function.body)
         endScope()
+
         currentFunction = enclosingFunction
     }
 
     private fun beginScope() {
-        scopes.push(HashMap())
+        scopes.push(mutableMapOf())
     }
 
     private fun endScope() {
@@ -203,7 +207,6 @@ class Resolver(private val interpreter: Interpreter) : Stmt.Visitor<Unit>, Expr.
     override fun <R> visitFunctionStmt(stmt: Stmt.Function): R {
         declare(stmt.name)
         define(stmt.name)
-
         resolveFunction(stmt, FunctionType.FUNCTION)
         return Unit as R
     }
