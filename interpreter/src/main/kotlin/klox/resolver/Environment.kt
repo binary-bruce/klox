@@ -34,7 +34,7 @@ data class Environment(val enclosing: Environment? = null) {
         values[name] = value
     }
 
-    fun ancestor(distance: Int): Environment {
+    private fun ancestor(distance: Int): Environment {
         var environment: Environment = this
         for (i in 0 until distance) {
             environment = environment.enclosing!!

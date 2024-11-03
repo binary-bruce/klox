@@ -1,7 +1,6 @@
 package klox.interpreter
 
 import klox.Lox
-import klox.Return
 import klox.RuntimeError
 import klox.ast.Expr
 import klox.ast.Stmt

@@ -1,6 +1,5 @@
 package klox.interpreter
 
-import klox.Return
 import klox.ast.Stmt
 import klox.resolver.Environment
 
